@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700">
+  <style>
+    body {
+      background: #08ac4b;
+      font-family: "Roboto", sans-serif;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .login-page {
+      background: #FFFFFF;
+      box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+      border-radius: 10px;
+      overflow: hidden;
+      width: 360px;
+      max-width: 90%;
+    }
+
+    .form {
+      padding: 45px;
+      text-align: center;
+    }
+
+    .form input {
+      outline: 0;
+      background: #f2f2f2;
+      width: 100%;
+      border: 0;
+      margin: 0 0 15px;
+      padding: 15px;
+      box-sizing: border-box;
+      font-size: 14px;
+      border-radius: 5px;
+    }
+
+    .form button {
+      text-transform: uppercase;
+      outline: 0;
+      background: #08ac4b;
+      width: 100%;
+      border: 0;
+      padding: 15px;
+      color: #FFFFFF;
+      font-size: 14px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .form button:hover {
+      background-color: #07a346;
+    }
+
+    .form .message {
+      margin: 15px 0 0;
+      color: #b3b3b3;
+      font-size: 12px;
+    }
+
+    .form .message a {
+      color: #07a346;
+      text-decoration: none;
+    }
+
+    .error-message {
+      color: red;
+      margin-top: 10px;
+    }
+
+    #success-screen {
+      display: none;
+      text-align: center;
+      color: #FFFFFF;
+      padding: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="login-page">
+    <div class="form" id="login-form">
+      <form onsubmit="login(); return false;">
+        <input type="text" id="username" placeholder="Username" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <button type="submit">Login</button>
+        <p class="message">Forgot your password? <a href="password.html">Change Password</a></p>
+        <div id="error-message" class="error-message"></div>
+      </form>
+    </div>
+    <!-- Success screen -->
+    <div id="success-screen">
+      <h2>Welcome! Access Granted</h2>
+      <!-- Add content for the success screen as needed -->
+    </div>
+  </div>
+
+  <!-- Add these script tags for Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.6/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.6/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.6/firebase-database.js"></script>
+
+  <!-- Add these script tags for Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.6/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.6/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.6/firebase-database-compat.js"></script>
+
+  <script>
+    // Your Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCc99dAgCLCHAfhP_-1gZxOHJ0FyZS5RV0",
+      authDomain: "au-offer.firebaseapp.com",
+      databaseURL: "https://au-offer-default-rtdb.firebaseio.com",
+      projectId: "au-offer",
+      storageBucket: "au-offer.appspot.com",
+      messagingSenderId: "892581950292",
+      appId: "1:892581950292:web:bc0a67a446c34fd49f0ec1",
+      measurementId: "G-902Z03TXT4"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    function login() {
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      const usersRef = firebase.database().ref('auth/admin_info');
+
+      usersRef.once('value').then((snapshot) => {
+        const userData = snapshot.val();
+
+        if (userData && userData.username === username && userData.password.toString() === password.toString()) {
+          // Access granted, redirect to the dashboard with user data
+          const url = `UserList.html?username=${userData.username}&password=${userData.password}`;
+          window.location.href = url;
+        } else {
+          // Access denied, display error message with correct username and password
+          document.getElementById("error-message").innerText = `Access denied. The correct credentials are: Username: ${userData.username}, Password: ${userData.password}`;
+          // Clear the password field for security reasons
+          document.getElementById("password").value = "";
+        }
+      }).catch((error) => {
+        // Handle any errors        console.error(error);
+        document.getElementById("error-message").innerText = "An error occurred. Please try again.";
+      });
+    }
+  </script>
+</body>
+
+</html>
+

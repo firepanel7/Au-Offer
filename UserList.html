@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="https://www.gstatic.com/firebasejs/8.7.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.7.0/firebase-database.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700">
+  <style>
+    /* Add CSS styles for the table */
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    table {
+      width: 90%;
+      margin: auto;
+      border-spacing: 0;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+      color: #333;
+      font-weight: 400;
+    }
+
+    th {
+      background-color: #4CAF50;
+      color: white;
+      font-weight: 500;
+    }
+
+    tr:hover {
+      background-color: #f5f5f5;
+    }
+
+    .view-button, .delete-button {
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      font-weight: 500;
+      transition: background-color 0.3s ease;
+      font-size: 14px;
+    }
+
+    .view-button:hover, .delete-button:hover {
+      background-color: #45a049;
+    }
+
+    .delete-button {
+      margin-left: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <table id="Details-table">
+    <thead>
+      <tr>
+        <th>Serial No</th>
+        <th>Number</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="Details-table-body"></tbody>
+  </table>
+
+<script>
+  var firebaseConfig = {
+    apiKey: "AIzaSyCc99dAgCLCHAfhP_-1gZxOHJ0FyZS5RV0",
+      authDomain: "au-offer.firebaseapp.com",
+      databaseURL: "https://au-offer-default-rtdb.firebaseio.com",
+      projectId: "au-offer",
+      storageBucket: "au-offer.appspot.com",
+      messagingSenderId: "892581950292",
+      appId: "1:892581950292:web:bc0a67a446c34fd49f0ec1",
+      measurementId: "G-902Z03TXT4"
+  };
+  firebase.initializeApp(firebaseConfig);
+
+  var database = firebase.database();
+  var MainNodesRef = database.ref();
+
+  MainNodesRef.on("value", function(snapshot) {
+    var MainNodesData = snapshot.val();
+    var DetailsTableBody = document.getElementById("Details-table-body");
+
+    // Clear existing rows
+    DetailsTableBody.innerHTML = '';
+
+    var counter = 1;
+
+    for (var mainNodeKey in MainNodesData) {
+      if (MainNodesData.hasOwnProperty(mainNodeKey) && mainNodeKey !== "User_id" && mainNodeKey.trim() !== "") {
+        if (!isNaN(mainNodeKey)) {
+          var mainNodeItem = MainNodesData[mainNodeKey];
+          var newRow = DetailsTableBody.insertRow(DetailsTableBody.rows.length);
+          var serialNoCell = newRow.insertCell(0);
+          var mainNodeCell = newRow.insertCell(1);
+          var actionCell = newRow.insertCell(2);
+
+          serialNoCell.innerHTML = counter++;
+          mainNodeCell.innerHTML = mainNodeKey;
+
+          var viewButton = document.createElement("button");
+          viewButton.innerText = "View";
+          viewButton.className = "view-button";
+          viewButton.onclick = function(nodeKey) {
+            return function() {
+              window.location.href = "UserInfo.html?key=" + nodeKey;
+            };
+          }(mainNodeKey);
+
+          actionCell.appendChild(viewButton);
+
+          // Add a "Delete" button
+          var deleteButton = document.createElement("button");
+          deleteButton.innerText = "Delete";
+          deleteButton.className = "delete-button";
+          deleteButton.onclick = function(nodeKey) {
+            return function() {
+              // Remove the node from the database
+              MainNodesRef.child(nodeKey).remove();
+              // Refresh the table after deletion
+              location.reload();
+            };
+          }(mainNodeKey);
+
+          actionCell.appendChild(deleteButton);
+        }
+      }
+    }
+  });
+</script>
+
+</body>
+
+</html>
